@@ -1,9 +1,8 @@
 @echo off
 chcp 65001 >nul
-set REPORT=%~dpOpc_report.txt
+set REPORT=%~dp0pc_report.txt
 
-echo 
-ДИАГНОСТИКА СИСТЕМЫ
+echo ДИАГНОСТИКА СИСТЕМЫ
 echo.
 
 echo Операционная система:
@@ -12,14 +11,14 @@ echo.
 
 
 echo Процессор:
-wmic cpu get Name /format:list | findstr "Name= "
+wmic cpu get Name /format:list | findstr "Name="
 echo.
 
 
 echo Оперативная память:
 
-for /f "tokens=2 delims==" %%A in('wmic OS get TotalVisibleMemorySize /value ^| findstr "="') do set TOTAL_MEM=%%A
-for /f "tokens=2 delims==" %%A in('wmic OS get FreePhysicalMemory /value ^| findstr "="') do set FREE_MEM=%%A
+for /f "tokens=2 delims==" %%A in ('wmic OS get TotalVisibleMemorySize /value ^| findstr "="') do set TOTAL_MEM=%%A
+for /f "tokens=2 delims==" %%A in ('wmic OS get FreePhysicalMemory /value ^| findstr "="') do set FREE_MEM=%%A
 
 set /a TOTAL_GB=%TOTAL_MEM% / 1048576
 set /a FREE_GB=%FREE_MEM% / 1048576
@@ -48,8 +47,8 @@ wmic product get Name /format:list | findstr "Name="
 echo.
 
 
-wmic os get Caption,Version /format:list | findstr /r "Caption= Version"
-wmic os get Caption,Version /format:list | findstr /r "Caption= Version" >> "%REPORT%"
+wmic os get Caption,Version /format:list | findstr /r "Caption= Version="
+wmic os get Caption,Version /format:list | findstr /r "Caption= Version=" >> "%REPORT%"
 
 
 pause
