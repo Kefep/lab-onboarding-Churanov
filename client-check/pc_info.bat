@@ -1,54 +1,74 @@
 @echo off
-chcp 65001 >nul
-set REPORT=%~dp0pc_report.txt
+chcp 65001
 
-echo ДИАГНОСТИКА СИСТЕМЫ
+set "REPORT=%~dp0pc_report.txt"
+
+echo              Диагностика компьютера
 echo.
 
-echo Операционная система:
-wmic os get Caption,Version /format:list | findstr /r "Caption= Version="
+for /f "tokens=2 delims==" %%A in ('wmic os get Caption /format:list ^| more ^| findstr "Caption="') do set "OS_NAME=%%A"
+for /f "tokens=2 delims==" %%A in ('wmic os get Version /format:list ^| more ^| findstr "Version="') do set "OS_VER=%%A"
+echo Операционная система
+echo --------------------
+echo Название: %OS_NAME%
+echo Версия:   %OS_VER%
 echo.
 
-
-echo Процессор:
-wmic cpu get Name /format:list | findstr "Name="
+for /f "tokens=2 delims==" %%A in ('wmic cpu get Name /format:list ^| more ^| findstr "Name="') do set "CPU_NAME=%%A"
+echo Процессор
+echo --------------------
+echo %CPU_NAME%
 echo.
 
-
-echo Оперативная память:
-
-for /f "tokens=2 delims==" %%A in ('wmic OS get TotalVisibleMemorySize /value ^| findstr "="') do set TOTAL_MEM=%%A
-for /f "tokens=2 delims==" %%A in ('wmic OS get FreePhysicalMemory /value ^| findstr "="') do set FREE_MEM=%%A
-
-set /a TOTAL_GB=%TOTAL_MEM% / 1048576
-set /a FREE_GB=%FREE_MEM% / 1048576
-
-echo Всего памяти: %TOTAL_GB% ГБ
-echo Свободно памяти: %FREE_GB% ГБ
+for /f "tokens=2 delims==" %%A in ('wmic OS get TotalVisibleMemorySize /format:list ^| more ^| findstr "TotalVisibleMemorySize="') do set /a TOTAL_MEM=%%A/1048576
+for /f "tokens=2 delims==" %%A in ('wmic OS get FreePhysicalMemory /format:list ^| more ^| findstr "FreePhysicalMemory="') do set /a FREE_MEM=%%A/1048576
+echo Оперативная память
+echo --------------------
+echo Всего памяти: %TOTAL_MEM% ГБ
+echo Свободно памяти: %FREE_MEM% ГБ
 echo.
 
-
-echo Диск C:
-
-for /f "tokens=2 delims==" %%A in ('wmic logicaldisk where "DeviceID='C:'" get Size /value ^| findstr "="') do set DISK_SIZE=%%A
-for /f "tokens=2 delims==" %%A in ('wmic logicaldisk where "DeviceID='C:'" get FreeSpace /value ^| findstr "="') do set DISK_FREE=%%A
-
-set /a DISK_SIZE_GB=%DISK_SIZE% / 1073741824
-set /a DISK_FREE_GB=%DISK_FREE% / 1073741824
-
-echo Общий размер:  %DISK_SIZE_GB% ГБ
-echo Свободно:      %DISK_FREE_GB% ГБ
+for /f "tokens=2 delims==" %%A in ('wmic logicaldisk where "DeviceID='C:'" get Size /format:list ^| more ^| findstr "Size="') do set /a DISK_SIZE=%%A/1048576/1024
+for /f "tokens=2 delims==" %%A in ('wmic logicaldisk where "DeviceID='C:'" get FreeSpace /format:list ^| more ^| findstr "FreeSpace="') do set /a DISK_FREE=%%A/1048576/1024
+echo Диск C
+echo --------------------
+echo Всего на диске: %DISK_SIZE% ГБ
+echo Свободно на диске: %DISK_FREE% ГБ
 echo.
 
-
-echo Установленные программы:
-echo Поиск...
-wmic product get Name /format:list | findstr "Name="
+echo Установленные программы
+echo --------------------
+reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall" /s | findstr "DisplayName"
+reg query "HKLM\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall" /s | findstr "DisplayName"
 echo.
 
+(
+echo              Диагностика компьютера
+echo.
+echo Операционная система
+echo --------------------
+echo Название: %OS_NAME%
+echo Версия:   %OS_VER%
+echo.
+echo Процессор
+echo --------------------
+echo %CPU_NAME%
+echo.
+echo Оперативная память
+echo --------------------
+echo Всего памяти: %TOTAL_MEM% ГБ
+echo Свободно памяти: %FREE_MEM% ГБ
+echo.
+echo Диск C
+echo --------------------
+echo Всего на диске: %DISK_SIZE% ГБ
+echo Свободно на диске: %DISK_FREE% ГБ
+echo.
+echo Установленные программы
+echo --------------------
+reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall" /s | findstr "DisplayName"
+reg query "HKLM\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall" /s | findstr "DisplayName"
+) > "%REPORT%"
 
-wmic os get Caption,Version /format:list | findstr /r "Caption= Version="
-wmic os get Caption,Version /format:list | findstr /r "Caption= Version=" >> "%REPORT%"
-
-
+echo Отчёт сохранён
 pause
